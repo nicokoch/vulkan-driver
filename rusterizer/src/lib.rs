@@ -1,4 +1,3 @@
-#![feature(pub_restricted)]
 extern crate libc;
 #[macro_use]
 extern crate log;

@@ -2477,5 +2477,4 @@ pub struct IcdSurfaceXlib {
 
 // TODO https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/blob/master/include/vulkan/vk_icd.h#L114
 #[repr(C)]
-pub struct IcdSurfaceDisplay {
-}
+pub struct IcdSurfaceDisplay {}

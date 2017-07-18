@@ -6,12 +6,15 @@ use loader_interface as api;
 use ffi_types as vk;
 use dispatch::{Instance, Device};
 
-pub fn lookup_entrypoint_instance(instance: Option<&Instance>,
-                                  name: &CStr)
-                                  -> *const vk::PFN_vkVoidFunction {
-    debug!("lookup_entrypoint_instance with params: instance: {:?}, pName: {:?}",
-           instance,
-           name);
+pub fn lookup_entrypoint_instance(
+    instance: Option<&Instance>,
+    name: &CStr,
+) -> *const vk::PFN_vkVoidFunction {
+    debug!(
+        "lookup_entrypoint_instance with params: instance: {:?}, pName: {:?}",
+        instance,
+        name
+    );
     if instance.is_none() {
         // Instance is null: Only global functions
         match name.to_string_lossy().as_ref() {
@@ -68,15 +71,17 @@ pub fn lookup_entrypoint_instance(instance: Option<&Instance>,
             function_name => {
                 warn!("Returning null pointer for function {}", function_name);
                 ptr::null()
-            } 
+            }
         }
     }
 }
 
 pub fn lookup_entrypoint_device(device: &Device, name: &CStr) -> *const vk::PFN_vkVoidFunction {
-    debug!("Calling vkGetDeviceProcAddr with params: device: {:?}, name: {:?}",
-           device,
-           name);
+    debug!(
+        "Calling vkGetDeviceProcAddr with params: device: {:?}, name: {:?}",
+        device,
+        name
+    );
     match name.to_string_lossy().as_ref() {
         // TODO
         "vkGetDeviceProcAddr" => api::vkGetDeviceProcAddr as *const _,
@@ -94,10 +99,10 @@ pub fn lookup_entrypoint_device(device: &Device, name: &CStr) -> *const vk::PFN_
         "vkCreateCommandPool" => api::vkCreateCommandPool as *const _,
         "vkAllocateCommandBuffers" => api::vkAllocateCommandBuffers as *const _,
         "vkCreateSwapchainKHR" => api::vkCreateSwapchainKHR as *const _,
-        "vkGetSwapchainImagesKHR" => api::vkGetSwapchainImagesKHR as *const _,
+        //"vkGetSwapchainImagesKHR" => api::vkGetSwapchainImagesKHR as *const _,
         function_name => {
-            warn!("Returning null pointer for function {}", function_name);    
+            warn!("Returning null pointer for function {}", function_name);
             ptr::null()
-        },
+        }
     }
 }

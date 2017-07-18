@@ -13,20 +13,24 @@ pub fn get_device_queue(device: &Device, queue_family_index: u32, queue_index: u
     device.queue()
 }
 
-pub fn create_command_pool(device: &Device,
-                           create_info: &vk::CommandPoolCreateInfo,
-                           alloc: *const vk::AllocationCallbacks)
-                           -> Result<Box<CommandPool>, vk::Result> {
+pub fn create_command_pool(
+    device: &Device,
+    create_info: &vk::CommandPoolCreateInfo,
+    alloc: *const vk::AllocationCallbacks,
+) -> Result<Box<CommandPool>, vk::Result> {
     debug!("Calling create_command_pool");
     CommandPool::from_create_info(create_info, alloc).map(|command_pool| Box::new(command_pool))
 }
 
-pub fn allocate_command_buffers(device: &Device,
-                                allocate_info: &mut vk::CommandBufferAllocateInfo)
-                                -> vk::Result {
+pub fn allocate_command_buffers(
+    device: &Device,
+    allocate_info: &mut vk::CommandBufferAllocateInfo,
+) -> vk::Result {
     debug!("Calling allocate_command_buffers");
-    debug_assert_eq!(allocate_info.sType,
-                     vk::STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+    debug_assert_eq!(
+        allocate_info.sType,
+        vk::STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO
+    );
     debug_assert!(allocate_info.pNext.is_null());
     for i in 0..allocate_info.commandBufferCount {
         let buffer = Box::new(CommandBuffer::new(allocate_info.level));

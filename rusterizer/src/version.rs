@@ -1,7 +1,7 @@
 use std::fmt;
 use std::convert::Into;
 
-#[derive(PartialEq, Eq, PartialOrd,  Copy, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Copy, Clone)]
 pub struct Version {
     repr: u32,
 }
@@ -21,7 +21,11 @@ impl Version {
 
     pub fn get(&self) -> (u32, u32, u32) {
         let repr = self.repr;
-        ((repr >> 22) & 0b1111111111, (repr >> 12) & 0b1111111111, repr & 0b111111111111)
+        (
+            (repr >> 22) & 0b1111111111,
+            (repr >> 12) & 0b1111111111,
+            repr & 0b111111111111,
+        )
     }
 
     pub fn repr(&self) -> u32 {

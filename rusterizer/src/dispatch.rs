@@ -36,9 +36,7 @@ impl VkLoaderDataUnion {
 
 impl Default for VkLoaderDataUnion {
     fn default() -> Self {
-        VkLoaderDataUnion {
-            data: ICD_LOADER_MAGIC,
-        }
+        VkLoaderDataUnion { data: ICD_LOADER_MAGIC }
     }
 }
 
@@ -55,9 +53,10 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn from_create_info(create_info: &vk::InstanceCreateInfo,
-                            alloc: *const vk::AllocationCallbacks)
-                            -> Result<Self, vk::Result> {
+    pub fn from_create_info(
+        create_info: &vk::InstanceCreateInfo,
+        alloc: *const vk::AllocationCallbacks,
+    ) -> Result<Self, vk::Result> {
         debug_assert_eq!(create_info.sType, vk::STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
         println!("{:?}", create_info);
         // TODO Why does this fail?
@@ -77,12 +76,17 @@ impl Instance {
         }
 
         let requested_extensions = unsafe {
-            parse_cchar_array(create_info.ppEnabledExtensionNames,
-                              create_info.enabledExtensionCount)
+            parse_cchar_array(
+                create_info.ppEnabledExtensionNames,
+                create_info.enabledExtensionCount,
+            )
         };
 
         for requested_extension in &requested_extensions {
-            if !AVAILABLE_EXTENSIONS.iter().any(|ext| ext.name() == requested_extension) {
+            if !AVAILABLE_EXTENSIONS.iter().any(|ext| {
+                ext.name() == requested_extension
+            })
+            {
                 warn!("Could not find extension {}", requested_extension);
                 return Err(vk::ERROR_EXTENSION_NOT_PRESENT);
             }
@@ -108,9 +112,10 @@ impl Instance {
     }
 }
 
-unsafe fn parse_cchar_array(extension_names: *const *const libc::c_char,
-                            count: u32)
-                            -> Vec<String> {
+unsafe fn parse_cchar_array(
+    extension_names: *const *const libc::c_char,
+    count: u32,
+) -> Vec<String> {
     let mut res = Vec::with_capacity(count as usize);
     for i in 0..count {
         let cstr = CStr::from_ptr(*extension_names.offset(i as isize));
@@ -119,9 +124,10 @@ unsafe fn parse_cchar_array(extension_names: *const *const libc::c_char,
     res
 }
 
-pub fn create_instance(create_info: &vk::InstanceCreateInfo,
-                       alloc: *const vk::AllocationCallbacks)
-                       -> Result<Box<Instance>, vk::Result> {
+pub fn create_instance(
+    create_info: &vk::InstanceCreateInfo,
+    alloc: *const vk::AllocationCallbacks,
+) -> Result<Box<Instance>, vk::Result> {
     debug!("calling create_instance");
     // Ok, so we box up the instance to store it on the heap, and immediately after "unbox" it, so
     // rust will not free the memory (Vulkan has manual memory management)
@@ -141,12 +147,15 @@ pub struct PhysicalDevice {
     _loader_data: VkLoaderDataUnion,
 }
 
-pub fn enumerate_physical_devices<'a>(instance: &'a mut Instance,
-                                  phys_device_count: &mut u32,
-                                  update_count: bool)
-                                  -> Option<&'a PhysicalDevice> {
-    debug!("calling enumerate_physical_devices with params: phys_device_count: {}",
-           *phys_device_count);
+pub fn enumerate_physical_devices<'a>(
+    instance: &'a mut Instance,
+    phys_device_count: &mut u32,
+    update_count: bool,
+) -> Option<&'a PhysicalDevice> {
+    debug!(
+        "calling enumerate_physical_devices with params: phys_device_count: {}",
+        *phys_device_count
+    );
     // Only one device (CPU) is always available, so this method is kind of trivial
     // Note that the intel driver uses this method for allocation too, so we should definitely look
     // into doing that.
@@ -170,15 +179,16 @@ pub struct Device {
 }
 
 impl Device {
-    pub fn from_create_info(create_info: &vk::DeviceCreateInfo,
-                            alloc: *const vk::AllocationCallbacks)
-                            -> Result<Self, vk::Result> {
+    pub fn from_create_info(
+        create_info: &vk::DeviceCreateInfo,
+        alloc: *const vk::AllocationCallbacks,
+    ) -> Result<Self, vk::Result> {
         debug_assert_eq!(create_info.sType, vk::STRUCTURE_TYPE_DEVICE_CREATE_INFO);
         // TODO why does this fail?
         // debug_assert!(create_info.pNext.is_null());
 
         if !alloc.is_null() {
-            warn!("Driver does not support custom allocators");
+            warn!("Driver does not support custom allocators yet");
             return Err(vk::ERROR_INITIALIZATION_FAILED);
         }
         Ok(Device {
@@ -205,8 +215,14 @@ pub struct CommandPool {
 }
 
 impl CommandPool {
-    pub fn from_create_info(create_info: &vk::CommandPoolCreateInfo, alloc: *const vk::AllocationCallbacks) -> Result<Self, vk::Result> {
-        debug_assert_eq!(create_info.sType, vk::STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO);
+    pub fn from_create_info(
+        create_info: &vk::CommandPoolCreateInfo,
+        alloc: *const vk::AllocationCallbacks,
+    ) -> Result<Self, vk::Result> {
+        debug_assert_eq!(
+            create_info.sType,
+            vk::STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO
+        );
         debug_assert!(create_info.pNext.is_null());
         if !alloc.is_null() {
             warn!("Custom allocators not supported by driver");

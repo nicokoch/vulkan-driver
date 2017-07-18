@@ -5,19 +5,29 @@ use libc;
 use ffi_types as vk;
 
 
-pub const AVAILABLE_EXTENSIONS: &'static [ExtensionProperties] = &[ExtensionProperties {
-                                                                       extension_name: "VK_KHR_surface",
-                                                                       spec_version: 25,
-                                                                   },
-                                                                   ExtensionProperties {
-                                                                       extension_name: "VK_KHR_xcb_surface",
-                                                                       spec_version: 5,
-                                                                   }];
+pub const AVAILABLE_EXTENSIONS: &'static [ExtensionProperties] = &[
+    ExtensionProperties {
+        extension_name: "VK_KHR_surface",
+        spec_version: 25,
+    },
+    #[cfg(unix)]
+    ExtensionProperties {
+        extension_name: "VK_KHR_xcb_surface",
+        spec_version: 5,
+    },
+    #[cfg(windows)]
+    ExtensionProperties {
+        extension_name: "VK_KHR_win32_surface",
+        spec_version: 5,
+    },
+];
 
-pub const AVAILABLE_DEVICE_EXTENSIONS: &'static [ExtensionProperties] = &[ExtensionProperties {
-                                                                              extension_name: "VK_KHR_swapchain",
-                                                                              spec_version: 67,
-                                                                          }];
+pub const AVAILABLE_DEVICE_EXTENSIONS: &'static [ExtensionProperties] = &[
+    ExtensionProperties {
+        extension_name: "VK_KHR_swapchain",
+        spec_version: 67,
+    },
+];
 
 pub struct ExtensionProperties {
     extension_name: &'static str,
@@ -27,7 +37,6 @@ pub struct ExtensionProperties {
 impl ExtensionProperties {
     fn to_vk_ffi(&self) -> vk::ExtensionProperties {
         // This conversation is a pita in rust :(
-        // Hopefully LLVM can optimize this to memcpy
         let mut arr = [0; vk::MAX_EXTENSION_NAME_SIZE as usize];
         let value = CString::new(self.extension_name).unwrap();
         for (a, c) in arr.iter_mut().zip(value.as_bytes_with_nul().iter()) {
@@ -45,17 +54,20 @@ impl ExtensionProperties {
     }
 }
 
-pub fn enumerate_extension_properties(layer_name: Option<&CStr>,
-                                      property_count: &mut u32,
-                                      properties: Option<&mut [vk::ExtensionProperties]>,
-                                      for_device: bool)
-                                      -> vk::Result {
-    debug!("enumerate_extension_properties with args: layer_name: {:?}, property_count: {:?}, \
+pub fn enumerate_extension_properties(
+    layer_name: Option<&CStr>,
+    property_count: &mut u32,
+    properties: Option<&mut [vk::ExtensionProperties]>,
+    for_device: bool,
+) -> vk::Result {
+    debug!(
+        "enumerate_extension_properties with args: layer_name: {:?}, property_count: {:?}, \
             properties_exists: {:?}, for_device: {}",
-           layer_name,
-           property_count,
-           properties.is_some(),
-           for_device);
+        layer_name,
+        property_count,
+        properties.is_some(),
+        for_device
+    );
     let available_extensions = if for_device {
         AVAILABLE_DEVICE_EXTENSIONS
     } else {
@@ -83,8 +95,10 @@ pub fn enumerate_extension_properties(layer_name: Option<&CStr>,
 
         } else {
             // TODO: deal with layer_name
-            warn!("enumerate_extension_properties called with non-null layer_name, no extensions \
-                   will be found.");
+            warn!(
+                "enumerate_extension_properties called with non-null layer_name, no extensions \
+                   will be found."
+            );
             unimplemented!()
         }
     }
