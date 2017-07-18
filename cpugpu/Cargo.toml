@@ -1,0 +1,6 @@
+[package]
+name = "cpugpu"
+version = "0.1.0"
+authors = ["Nicolas Koch <nioko1337@gmail.com>"]
+
+[dependencies]
