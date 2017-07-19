@@ -1,0 +1,9 @@
+[package]
+name = "spirv_llvm"
+version = "0.1.0"
+authors = ["Nicolas Koch <nicolas.koch@btc-ag.com>"]
+
+[dependencies]
+rspirv = "0.4"
+spirv_headers = "*"
+llvm-sys = "40"
